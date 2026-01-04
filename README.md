@@ -9,6 +9,21 @@ It includes:
 - Batch and single-customer prediction via Streamlit web app
 - Churn risk report downloadable
 
+Column Definitions
+Feature               |  Meaning
+-------------------------------------------------------------------------
+Usage Frequency       |  Number of platform interactions in last 30 days
+Payment Delay	      |  Total delayed payment days in last billing cycle
+Last Interaction      |  Days since last customer activity
+
+CSV Input
+Column Name	    | Type    | Range
+---------------------------------------
+Usage Frequency	    | int     | 0 – 100
+Payment Delay	    | int     | 0 – 60
+Last Interaction    | int     | 0 – 90
+with customer ID's.
+
 APPROACH
 I explored the dataset and experimented with different features and models.
 After multiple iterations, I found that the following three features were the most predictive:
