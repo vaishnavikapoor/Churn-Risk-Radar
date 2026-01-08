@@ -29,10 +29,15 @@ if mode == "Single Customer":
             "last_interaction": last_interaction
         }
 
-        response = requests.post(API_URL, json=payload).json()
+        res = requests.post(API_URL, json=payload)
 
-        st.metric("Churn Probability", response["churn_probability"])
-        st.success(f"Risk Level: {response['risk_level']}")
+        if res.status_code != 200:
+            st.error(f"Backend error: {res.text}")
+        else:
+            response = res.json()
+            st.success(f"Risk Level: {response['risk_level']}")
+            st.metric("Churn Probability", f"{response['churn_probability']*100:.1f}%")
+
 
 # ---------------- BULK MODE ----------------
 else:

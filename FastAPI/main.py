@@ -12,9 +12,9 @@ required_cols = ['Usage Frequency', 'Payment Delay', 'Last Interaction']
 
 # ---------- Input Schema ----------
 class CustomerData(BaseModel):
-    Usage_Frequency: float
-    Payment_Delay: float
-    Last_Interaction: float
+    usage_frequency: float
+    payment_delay: float
+    last_interaction: float
 
 # ---------- Output Schema ----------
 class PredictionOut(BaseModel):
@@ -38,9 +38,9 @@ def home():
 @app.post("/predict", response_model=PredictionOut)
 def predict(data: CustomerData):
 
-    df = pd.DataFrame([[data.Usage_Frequency,
-                        data.Payment_Delay,
-                        data.Last_Interaction]],
+    df = pd.DataFrame([[data.usage_frequency,
+                        data.payment_delay,
+                        data.last_interaction]],
                         columns=required_cols)
 
     prob = model.predict_proba(df)[:, 1][0]
