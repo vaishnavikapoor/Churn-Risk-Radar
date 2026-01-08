@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-import pandas as pd
+import os
 import joblib
 
 app = FastAPI(title="Customer Risk Radar API")
@@ -10,7 +10,6 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "churn_model.pkl")
 model = joblib.load(MODEL_PATH)
 
-required_cols = ['Usage Frequency', 'Payment Delay', 'Last Interaction']
 
 # ---------- Input Schema ----------
 class CustomerData(BaseModel):
@@ -40,12 +39,13 @@ def home():
 @app.post("/predict", response_model=PredictionOut)
 def predict(data: CustomerData):
 
-    df = pd.DataFrame([[data.usage_frequency,
-                        data.payment_delay,
-                        data.last_interaction]],
-                        columns=required_cols)
+    X = [[
+        data.usage_frequency,
+        data.payment_delay,
+        data.last_interaction
+    ]]
 
-    prob = model.predict_proba(df)[:, 1][0]
+    prob = model.predict_proba(X)[0][1]
     risk = classify_risk(prob)
 
     return {
