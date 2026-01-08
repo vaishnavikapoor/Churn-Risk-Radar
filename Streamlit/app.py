@@ -1,8 +1,10 @@
-# Streamlit app for batch churn prediction using FastAPI backend
-
 import streamlit as st
 import pandas as pd
 import requests
+import time
+
+# Force no HTTP caching
+requests.sessions.Session.trust_env = False
 
 API_URL = "https://churn-risk-radar.onrender.com/predict"
 
@@ -29,15 +31,23 @@ if mode == "Single Customer":
             "last_interaction": last_interaction
         }
 
-        res = requests.post(API_URL, json=payload)
+        try:
+            res = requests.post(
+                API_URL,
+                json=payload,
+                headers={"Cache-Control": "no-cache"},
+                timeout=10
+            )
 
-        if res.status_code != 200:
-            st.error(f"Backend error: {res.text}")
-        else:
-            response = res.json()
-            st.success(f"Risk Level: {response['risk_level']}")
-            st.metric("Churn Probability", f"{response['churn_probability']*100:.1f}%")
+            if res.status_code != 200:
+                st.error(f"Backend error: {res.text}")
+            else:
+                response = res.json()
+                st.success(f"Risk Level: {response['risk_level']}")
+                st.metric("Churn Probability", f"{response['churn_probability']*100:.2f}%")
 
+        except Exception as e:
+            st.error(f"Connection failed: {e}")
 
 # ---------------- BULK MODE ----------------
 else:
@@ -55,23 +65,33 @@ else:
 
             for _, row in data.iterrows():
                 payload = {
-                    "usage_frequency": row["Usage Frequency"],
-                    "payment_delay": row["Payment Delay"],
-                    "last_interaction": row["Last Interaction"]
+                    "usage_frequency": float(row["Usage Frequency"]),
+                    "payment_delay": float(row["Payment Delay"]),
+                    "last_interaction": float(row["Last Interaction"])
                 }
 
-                res = requests.post(API_URL, json=payload).json()
+                res = requests.post(
+                    API_URL,
+                    json=payload,
+                    headers={"Cache-Control": "no-cache"},
+                    timeout=10
+                )
 
-                results.append([
-                    res["churn_probability"],
-                    res["risk_level"]
-                ])
+                if res.status_code == 200:
+                    out = res.json()
+                    results.append([out["churn_probability"], out["risk_level"]])
+                else:
+                    results.append([None, "API Error"])
+
+                time.sleep(0.1)  # prevents Render throttling
 
             data["Churn Probability"] = [r[0] for r in results]
             data["Risk Level"] = [r[1] for r in results]
 
             st.dataframe(data.head())
-
-            csv = data.to_csv(index=False, encoding="utf-8-sig")
-            st.download_button("Download Risk Report", csv, "churn_risk_report.csv", "text/csv")
-
+            st.download_button(
+                "Download Risk Report",
+                data.to_csv(index=False),
+                "churn_risk_report.csv",
+                "text/csv"
+            )
