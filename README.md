@@ -1,7 +1,7 @@
 Customer Risk Radar – Churn Prediction System
 
 The present project takes a view on customer churn probability based on behavioral signals and categorizes customers into Low, Moderate, and High risk.
-App- https://churn-risk-radar-ne58r4ty5uhu3yd2ohiuy7.streamlit.app/
+App- https://churn-risk-radar-e5c7fe6v8d64nuuo2q2adh.streamlit.app/
 
 It includes:
 - Logistic Regression churn model AUC 0.80
