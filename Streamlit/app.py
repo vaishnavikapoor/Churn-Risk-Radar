@@ -4,7 +4,7 @@ import streamlit as st
 import pandas as pd
 import requests
 
-API_URL = "https://churn-api.onrender.com/predict"
+API_URL = "https://churn-risk-radar.onrender.com/predict"
 
 st.set_page_config(page_title="Customer Risk Radar", layout="centered")
 st.title("Customer Risk Radar")
