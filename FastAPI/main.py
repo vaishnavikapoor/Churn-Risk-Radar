@@ -6,7 +6,9 @@ import joblib
 app = FastAPI(title="Customer Risk Radar API")
 
 # Load model
-model = joblib.load("churn_model.pkl")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "churn_model.pkl")
+model = joblib.load(MODEL_PATH)
 
 required_cols = ['Usage Frequency', 'Payment Delay', 'Last Interaction']
 
