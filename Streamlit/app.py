@@ -6,7 +6,7 @@ import time
 # Force no HTTP caching
 requests.sessions.Session.trust_env = False
 
-API_URL = "https://churn-risk-radar.onrender.com/predict"
+API_URL = "https://churn-risk-radar.onrender.com"
 
 st.set_page_config(page_title="Customer Risk Radar", layout="centered")
 st.title("Customer Risk Radar")
@@ -33,11 +33,11 @@ if mode == "Single Customer":
 
         try:
             res = requests.post(
-                API_URL,
+                f"{API_URL}/predict",
                 json=payload,
-                headers={"Cache-Control": "no-cache"},
                 timeout=10
             )
+
 
             if res.status_code != 200:
                 st.error(f"Backend error: {res.text}")
@@ -63,27 +63,39 @@ else:
         else:
             results = []
 
-            for _, row in data.iterrows():
-                payload = {
-                    "usage_frequency": float(row["Usage Frequency"]),
-                    "payment_delay": float(row["Payment Delay"]),
-                    "last_interaction": float(row["Last Interaction"])
-                }
+            payload = {
+                "records": [
+                    {
+                        "usage_frequency": float(row["Usage Frequency"]),
+                        "payment_delay": float(row["Payment Delay"]),
+                        "last_interaction": float(row["Last Interaction"])
+                    }       
+                    for _, row in data.iterrows()
+                ]
+            }
 
+            with st.spinner("Processing batch..."):
                 res = requests.post(
-                    API_URL,
+                    f"{API_URL}/predict-batch",
                     json=payload,
-                    headers={"Cache-Control": "no-cache"},
-                    timeout=10
+                    timeout=30
                 )
 
-                if res.status_code == 200:
-                    out = res.json()
-                    results.append([out["churn_probability"], out["risk_level"]])
-                else:
-                    results.append([None, "API Error"])
+            if res.status_code != 200:
+                st.error(f"Backend error: {res.text}")
+            else:
+                results = res.json()["results"]
 
-                time.sleep(0.1)  # prevents Render throttling
+                data["Churn Probability"] = [r["churn_probability"] for r in results]
+                data["Risk Level"] = [r["risk_level"] for r in results]
+
+                st.dataframe(data.head())
+                st.download_button(
+                    "Download Risk Report",
+                    data.to_csv(index=False),
+                    "churn_risk_report.csv",
+                    "text/csv"
+                )
 
             data["Churn Probability"] = [r[0] for r in results]
             data["Risk Level"] = [r[1] for r in results]

@@ -4,6 +4,7 @@ import os
 import joblib
 import csv
 from datetime import datetime
+from typing import List
 
 app = FastAPI(title="Customer Risk Radar API")
 
@@ -24,6 +25,9 @@ class CustomerData(BaseModel):
     usage_frequency: float
     payment_delay: float
     last_interaction: float
+
+class CustomerBatch(BaseModel):
+    records: List[CustomerData]
 
 # ---------- Output Schema ----------
 class PredictionOut(BaseModel):
@@ -75,3 +79,23 @@ def predict(data: CustomerData):
         "churn_probability": float(prob),
         "risk_level": risk
     }
+
+@app.post("/predict-batch")
+def predict_batch(data: CustomerBatch):
+
+    X = [[
+        d.usage_frequency,
+        d.payment_delay,
+        d.last_interaction
+    ] for d in data.records]
+
+    probs = model.predict_proba(X)[:, 1]
+
+    results = []
+    for p in probs:
+        results.append({
+            "churn_probability": float(p),
+            "risk_level": classify_risk(p)
+        })
+
+    return {"results": results}
