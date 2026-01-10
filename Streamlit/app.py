@@ -1,10 +1,6 @@
 import streamlit as st
 import pandas as pd
 import requests
-import time
-
-# Force no HTTP caching
-requests.sessions.Session.trust_env = False
 
 API_URL = "https://churn-risk-radar.onrender.com"
 
@@ -13,10 +9,9 @@ st.title("Customer Risk Radar")
 st.write("Predict customer churn risk using behavior signals.")
 
 required_cols = ['Usage Frequency', 'Payment Delay', 'Last Interaction']
-
 mode = st.radio("Select Mode", ["Single Customer", "Bulk CSV Upload"])
 
-# ---------------- SINGLE CUSTOMER MODE ----------------
+# ---------- SINGLE CUSTOMER ----------
 if mode == "Single Customer":
     st.subheader("Single Customer Prediction")
 
@@ -32,29 +27,19 @@ if mode == "Single Customer":
         }
 
         try:
-            res = requests.post(
-                f"{API_URL}/predict",
-                json=payload,
-<<<<<<< HEAD
-                timeout=10
-=======
-                headers={"Cache-Control": "no-cache"},
-                timeout=120
->>>>>>> a4129eb792b9992c434b48d92a84e88ca476164b
-            )
-
+            res = requests.post(f"{API_URL}/predict", json=payload, timeout=30)
 
             if res.status_code != 200:
                 st.error(f"Backend error: {res.text}")
             else:
-                response = res.json()
-                st.success(f"Risk Level: {response['risk_level']}")
-                st.metric("Churn Probability", f"{response['churn_probability']*100:.2f}%")
+                r = res.json()
+                st.success(f"Risk Level: {r['risk_level']}")
+                st.metric("Churn Probability", f"{r['churn_probability']*100:.2f}%")
 
         except Exception as e:
             st.error(f"Connection failed: {e}")
 
-# ---------------- BULK MODE ----------------
+# ---------- BULK CSV ----------
 else:
     st.subheader("Bulk Customer Risk Prediction")
 
@@ -66,25 +51,19 @@ else:
         if not all(col in data.columns for col in required_cols):
             st.error("CSV must contain: Usage Frequency, Payment Delay, Last Interaction")
         else:
-            results = []
-
             payload = {
                 "records": [
                     {
                         "usage_frequency": float(row["Usage Frequency"]),
                         "payment_delay": float(row["Payment Delay"]),
                         "last_interaction": float(row["Last Interaction"])
-                    }       
+                    }
                     for _, row in data.iterrows()
                 ]
             }
 
             with st.spinner("Processing batch..."):
-                res = requests.post(
-                    f"{API_URL}/predict-batch",
-                    json=payload,
-                    timeout=30
-                )
+                res = requests.post(f"{API_URL}/predict-batch", json=payload, timeout=60)
 
             if res.status_code != 200:
                 st.error(f"Backend error: {res.text}")
@@ -102,13 +81,3 @@ else:
                     "text/csv"
                 )
 
-            data["Churn Probability"] = [r[0] for r in results]
-            data["Risk Level"] = [r[1] for r in results]
-
-            st.dataframe(data.head())
-            st.download_button(
-                "Download Risk Report",
-                data.to_csv(index=False),
-                "churn_risk_report.csv",
-                "text/csv"
-            )
