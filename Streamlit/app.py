@@ -36,7 +36,7 @@ if mode == "Single Customer":
                 API_URL,
                 json=payload,
                 headers={"Cache-Control": "no-cache"},
-                timeout=10
+                timeout=120
             )
 
             if res.status_code != 200:
