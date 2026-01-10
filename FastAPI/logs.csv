@@ -1,0 +1,4 @@
+timestamp,usage_frequency,payment_delay,last_interaction,churn_probability,risk_level
+2026-01-10T18:05:45.551183,4.0,6.0,11.0,0.9995,High Risk
+2026-01-10T18:06:23.517204,45.0,6.0,1.0,0.6287,Moderate Risk
+2026-01-10T18:06:34.270811,45.0,0.0,1.0,0.0261,Low Risk

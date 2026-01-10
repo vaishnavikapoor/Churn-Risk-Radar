@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import os
 import joblib
+import csv
+from datetime import datetime
 
 app = FastAPI(title="Customer Risk Radar API")
 
@@ -10,6 +12,12 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "churn_model.pkl")
 model = joblib.load(MODEL_PATH)
 
+LOG_FILE = os.path.join(BASE_DIR, "logs.csv")
+
+if not os.path.exists(LOG_FILE):
+    with open(LOG_FILE, "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["timestamp", "usage_frequency", "payment_delay", "last_interaction", "churn_probability", "risk_level"])
 
 # ---------- Input Schema ----------
 class CustomerData(BaseModel):
@@ -47,6 +55,17 @@ def predict(data: CustomerData):
 
     prob = model.predict_proba(X)[0][1]
     risk = classify_risk(prob)
+
+    with open(LOG_FILE, "a", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow([
+            datetime.now().isoformat(),
+            data.usage_frequency,
+            data.payment_delay,
+            data.last_interaction,
+            round(float(prob), 4),
+            risk
+    ])
 
     return {
         "churn_probability": float(prob),
