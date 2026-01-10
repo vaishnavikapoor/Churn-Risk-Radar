@@ -44,6 +44,10 @@ def classify_risk(prob):
 def home():
     return {"message": "Customer Risk Radar API is running"}
 
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
+
 @app.post("/predict", response_model=PredictionOut)
 def predict(data: CustomerData):
 
