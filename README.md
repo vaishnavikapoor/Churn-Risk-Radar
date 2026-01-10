@@ -1,56 +1,84 @@
-Customer Risk Radar – Churn Prediction System
+# Customer Risk Radar – Churn Prediction System
 
-The present project takes a view on customer churn probability based on behavioral signals and categorizes customers into Low, Moderate, and High risk.
-App- https://churn-risk-radar-e5c7fe6v8d64nuuo2q2adh.streamlit.app/
+Live App:
+https://churn-risk-radar-e5c7fe6v8d64nuuo2q2adh.streamlit.app/
 
-It includes:
-- Logistic Regression churn model AUC 0.80
-- Feature selection by correlation and importance analysis
-- Batch and single-customer prediction via Streamlit web app
-- Churn risk report downloadable
+Customer Risk Radar predicts customer churn probability using behavioral signals and categorizes customers into Low, Moderate, and High risk.
 
-Column Definitions
-Feature               ->  Meaning     
--------------------------------------------------------------------------
-Usage Frequency   ->  Number of platform interactions in last 30 days,
-Payment Delay	  ->  Total delayed payment days in last billing cycle,
-Last Interaction  ->  Days since last customer activity
+------------------------------------------------------------
 
-CSV Input
-Column Name	    | Type    | Range
+PROBLEM OVERVIEW
 
-Usage Frequency	    | int     | 0 – 100
-Payment Delay	    | int     | 0 – 60
-Last Interaction    | int     | 0 – 90
-with customer ID's.
+Customer churn has a direct impact on revenue. This system identifies churn risk using three key behavioral features.
 
-APPROACH
-I explored the dataset and experimented with different features and models.
-After multiple iterations, I found that the following three features were the most predictive:
-        -Usage Frequency
-        -Payment Delay
-        -Last Interaction
-Using these features, Logistic Regression achieved the best performance.
+Feature | Description
+Usage Frequency | Number of platform interactions in last 30 days
+Payment Delay | Total delayed payment days in last billing cycle
+Last Interaction | Days since last customer activity
 
-MODELS TRIED
-        -Logistic Regression
-        -Random Forest
-        -XGBoost
-Final Model: Logistic Regression
-After iterative experimentation, identified three behavioral features that improved ROC-AUC from 0.69 to 0.806.
-Best ROC-AUC Score: 0.806
+------------------------------------------------------------
 
-RESULTS
-It generates a probability of churn that is then transformed into risk levels by:
-        -High Risk
-        -Moderate Risk
-        -Low Risk
-This allows businesses to focus on strategies for retaining their customers.
+MODELING APPROACH
 
-TOOLS & LIBRARIES
-    -Python
-    -Pandas, Numpy
-    -Scikit
-    -matplotlib / seaborn
-    -Streamlit
+Multiple models were explored using correlation analysis and feature importance.
 
+Models tried:
+- Logistic Regression
+- Random Forest
+- XGBoost
+
+After iterative experimentation, the following three features were selected:
+- Usage Frequency
+- Payment Delay
+- Last Interaction
+
+These features improved ROC-AUC from 0.69 to 0.806.
+
+Final Model: Logistic Regression  
+Best ROC-AUC: 0.806
+
+------------------------------------------------------------
+
+INPUT FORMAT
+
+CSV file must contain the following columns:
+
+Column Name | Type | Range
+Usage Frequency | int | 0 – 100
+Payment Delay | int | 0 – 60
+Last Interaction | int | 0 – 90
+
+Customer IDs may be included.
+
+------------------------------------------------------------
+
+APPLICATION FEATURES
+
+- Single-customer churn prediction
+- Batch CSV churn prediction
+- Downloadable churn risk report
+- Risk categorization: Low, Moderate, High
+- End-to-end deployed ML system
+
+------------------------------------------------------------
+
+TECH STACK
+
+- Python
+- Pandas, NumPy
+- Scikit-learn
+- Matplotlib, Seaborn
+- Streamlit
+- FastAPI
+
+------------------------------------------------------------
+
+RESULT
+
+The system generates churn probabilities and assigns actionable risk levels to support customer retention strategies.
+
+------------------------------------------------------------
+
+WHY THIS PROJECT MATTERS
+
+This project demonstrates a full machine learning deployment lifecycle including feature engineering, model optimization, batch inference pipelines, and production-ready web integration.
