@@ -35,7 +35,12 @@ if mode == "Single Customer":
             res = requests.post(
                 f"{API_URL}/predict",
                 json=payload,
+<<<<<<< HEAD
                 timeout=10
+=======
+                headers={"Cache-Control": "no-cache"},
+                timeout=120
+>>>>>>> a4129eb792b9992c434b48d92a84e88ca476164b
             )
 
 
